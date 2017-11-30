@@ -44,6 +44,7 @@ train_transforms = transforms.Compose([
                           translation_range=(-0.1, 0.1),
                           scale_range=(0.8, 1.2),
                           shear_range=(-0.1, 0.1)),
+    transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
     transforms.ToTensor()
 ])
 

@@ -90,7 +90,7 @@ def validation(model, loader):
           ' set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'
           .format(validation_loss, correct, len(loader.dataset),
                   100. * correct / len(loader.dataset)))
-
+    model.train()
     return 100 * correct / len(loader.dataset)
 
 

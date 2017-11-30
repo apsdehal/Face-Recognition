@@ -28,10 +28,11 @@ class ConvLayer(nn.Module):
         self.conv1 = nn.Conv2d(in_c, out_c, kernel_size=kernel_size)
         self.conv2 = nn.Conv2d(out_c, out_c, kernel_size=kernel_size)
         self.max_pool2d = nn.MaxPool2d(max_pool_stride)
+        self.relu = nn.ReLU()
         self.dropout = nn.Dropout2d(p=dropout_ratio)
 
     def forward(self, x):
-        x = self.conv2(self.conv1(x))
+        x = self.relu(self.conv2(self.relu(self.conv1(x))))
         return self.dropout(self.max_pool2d(x))
 
 
@@ -39,21 +40,17 @@ class Network(nn.Module):
     def __init__(self, args):
         super(Network, self).__init__()
         self.args = args
-
-        self.conv1 = ConvLayer(NUM_CHANNELS, 32, kernel_size=11)
-        self.conv2 = ConvLayer(32, 64, kernel_size=9)
-        self.conv3 = ConvLayer(64, 128, kernel_size=7)
-        self.conv4 = ConvLayer(128, 256, kernel_size=5)
-        inputs = [self.conv1, self.conv2, self.conv3, self.conv4]
-        conv_output_size, _ = get_convnet_output_size(inputs)
-        print(conv_output_size, self.args.num_classes)
-        self.fully_connected = nn.Linear(conv_output_size,
-                                         self.args.num_classes)
+        self.convs = []
+        self.convs.append(ConvLayer(NUM_CHANNELS, 32, kernel_size=5))
+        self.conv.append(ConvLayer(32, 64, kernel_size=5))
+        conv_output_size, _ = get_convnet_output_size(self.convs)
+        self.fully_connected1 = nn.Linear(conv_output_size, 1024)
+        self.fully_connected2 = nn.Linear(1024,
+                                          self.args.num_classes)
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.conv4(x)
+        for conv in self.convs:
+            x = conv(x)
         x = x.view(x.size(0), -1)
-        return nn.functional.log_softmax(self.fully_connected(x))
+        x = nn.function.relu(self.fully_connected1(x))
+        return nn.functional.log_softmax(self.fully_connected2(x))
