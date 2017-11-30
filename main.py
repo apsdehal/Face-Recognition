@@ -31,6 +31,7 @@ parser.add_argument("--lr", type=float, default=0.001, metavar="L",
 
 
 args = parser.parse_args()
+args.cuda = torch.cuda.is_available()
 
 
 def main(args):
@@ -50,6 +51,10 @@ def main(args):
                                              num_workers=1)
 
     model = Network(args)
+
+    if args.cuda:
+        model = model.cuda()
+
     optimizer = optim.Adam(model.parameters(),
                            lr=args.lr)
     train(args, model, optimizer, train_loader, val_loader)
@@ -59,6 +64,10 @@ def train(args, model, optimizer, train_loader, val_loader):
     for i in range(args.epochs):
         for images, labels in train_loader:
             images, labels = Variable(images), Variable(labels)
+
+            if args.cuda:
+                images, labels = image.cuda(), labels.cuda()
+
             optimizer.zero_grad()
 
             output = model(images)
@@ -78,6 +87,9 @@ def validation(model, loader):
     correct = 0
     for images, labels in loader:
         images, labels = Variable(images, volatile=True), Variable(labels)
+
+        if args.cuda:
+            images, labels = images.cuda(), labels.cuda()
 
         output = model(images)
         validation_loss += F.nll_loss(output, labels,
