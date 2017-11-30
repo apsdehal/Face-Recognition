@@ -1,6 +1,8 @@
 import numpy as np
+import torch
 from torch import nn
-from constants import IMG_SIZE
+from constants import IMG_SIZE, NUM_CHANNELS
+from torch.autograd import Variable
 
 
 def get_convnet_output_size(network, input_size=IMG_SIZE):
@@ -38,13 +40,15 @@ class Network(nn.Module):
         super(Network, self).__init__()
         self.args = args
 
-        self.conv1 = ConvLayer(3, 32, kernel_size=11)
+        self.conv1 = ConvLayer(NUM_CHANNELS, 32, kernel_size=11)
         self.conv2 = ConvLayer(32, 64, kernel_size=9)
         self.conv3 = ConvLayer(64, 128, kernel_size=7)
         self.conv4 = ConvLayer(128, 256, kernel_size=5)
         inputs = [self.conv1, self.conv2, self.conv3, self.conv4]
-        conv_output = get_convnet_output_size(inputs)
-        self.fully_connected = nn.Linear(, self.args.num_classes)
+        conv_output_size, _ = get_convnet_output_size(inputs)
+        print(conv_output_size, self.args.num_classes)
+        self.fully_connected = nn.Linear(conv_output_size,
+                                         self.args.num_classes)
 
     def forward(self, x):
         x = self.conv1(x)

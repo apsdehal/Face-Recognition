@@ -1,10 +1,15 @@
+from __future__ import print_function
+from __future__ import division
+
 import argparse
 import torch
 from torch import optim
 from torch.nn.functional import nll_loss
 from torch.autograd import Variable
-from torchvision import datasets, transforms
+from torchvision import datasets
 from model import Network
+from transforms import val_transforms, train_transforms
+
 
 parser = argparse.ArgumentParser(description="CNN based Face Recognition")
 
@@ -16,8 +21,11 @@ parser.add_argument("--epochs", type=int,
                     help="Number of epochs for which" +
                     "the model is to be trained")
 parser.add_argument("--batch_size", type=int,
-                    default=1, metavar="E",
+                    default=16, metavar="E",
                     help="Mini Batch size for the trainer")
+parser.add_argument("--num_classes", type=int,
+                    default=15, metavar="C",
+                    help="Number of classes")
 parser.add_argument("--lr", type=float, default=0.001, metavar="L",
                     help="Learning Rate")
 
@@ -26,39 +34,25 @@ args = parser.parse_args()
 
 
 def main(args):
-    train_transforms = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.ColorJitter(0.6, 0.6, 0.6, 0.2),
-        RandomAffineTransform(rotation_range=(-0.2, 0.2),
-                              translation_range=(-0.1, 0.1),
-                              scale_range=(0.8, 1.2),
-                              shear_range=(-0.1, 0.1)),
-        transforms.ToTensor()
-    ])
+    train_dataset = datasets.ImageFolder(args.data + "/train",
+                                         transform=train_transforms)
+    val_dataset = datasets.ImageFolder(args.data + "/val",
+                                       transform=val_transforms)
 
-    val_transforms = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.ToTensor()
-    ])
-    train_dataset = datasets.ImageFolder(args.data + "/train_images",
-                                         transforms=train_transforms)
-    val_dataset = datasets.ImageFolder(args.data + "/val_images",
-                                       transforms=val_transforms)
+    train_loader = torch.utils.data.DataLoader(train_dataset,
+                                               batch_size=args.batch_size,
+                                               shuffle=True,
+                                               num_workers=1)
 
-    train_loader = torch.utils.DataLoader(train_dataset,
-                                          batch_size=args.batch_size,
-                                          shuffle=True,
-                                          num_workers=1)
-
-    val_loader = torch.utils.DataLoader(val_dataset,
-                                        batch_size=args.batch_size,
-                                        shuffle=True,
-                                        num_workers=1)
+    val_loader = torch.utils.data.DataLoader(val_dataset,
+                                             batch_size=args.batch_size,
+                                             shuffle=False,
+                                             num_workers=1)
 
     model = Network(args)
-    optimizer = optim.AdamOptimizer(model.parameters(),
-                                    lr=args.lr)
-    train(model, optimizer, train_loader, val_loader)
+    optimizer = optim.Adam(model.parameters(),
+                           lr=args.lr)
+    train(args, model, optimizer, train_loader, val_loader)
 
 
 def train(args, model, optimizer, train_loader, val_loader):
@@ -101,4 +95,4 @@ def validation(model, loader):
 
 
 if __name__ == '__main__':
-    main()
+    main(args)
