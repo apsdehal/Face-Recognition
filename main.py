@@ -86,14 +86,16 @@ def validation(model, loader):
         images, labels = Variable(images, volatile=True), Variable(labels)
 
         output = model(images)
-        validation_loss += F.nll_loss(output, labels, size_average=False).data[0]
+        validation_loss += F.nll_loss(output, labels,
+                                      size_average=False).data[0]
         pred = output.data.max(1, keepdim=True)[1]
         correct += pred.eq(labels.data.view_as(pred)).cpu().sum()
 
     validation_loss /= len(loader.dataset)
-    print('\n' + loader_type + ' set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        validation_loss, correct, len(loader.dataset),
-        100. * correct / len(loader.dataset)))
+    print('\n' + loader_type +
+          ' set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'
+          .format(validation_loss, correct, len(loader.dataset),
+                  100. * correct / len(loader.dataset)))
 
     return 100 * correct / len(loader.dataset)
 
