@@ -35,6 +35,7 @@ args.cuda = torch.cuda.is_available()
 
 
 def main(args):
+    print("Loading data")
     train_dataset = datasets.ImageFolder(args.data + "/train",
                                          transform=train_transforms)
     val_dataset = datasets.ImageFolder(args.data + "/val",
@@ -50,6 +51,8 @@ def main(args):
                                              shuffle=False,
                                              num_workers=1)
 
+    print("Data loaded")
+
     model = Network(args)
 
     if args.cuda:
@@ -57,6 +60,8 @@ def main(args):
 
     optimizer = optim.Adam(model.parameters(),
                            lr=args.lr)
+
+    print("Starting training")
     train(args, model, optimizer, train_loader, val_loader)
 
 
