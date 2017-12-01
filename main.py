@@ -32,6 +32,7 @@ parser.add_argument("--lr", type=float, default=0.001, metavar="L",
 
 args = parser.parse_args()
 args.cuda = torch.cuda.is_available()
+print("Cuda: ", args.cuda)
 
 
 def main(args):
