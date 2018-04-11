@@ -4,7 +4,7 @@ Face Recognition using a CNN architecture.
 
 ## Dataset
 
-Project uses Yale dataset as a demo, but is extensible to any face recognition dataset. Download Yale Face Database from [here](vision.ucsd.edu/content/yale-face-database).
+Project uses Yale dataset as a demo, but is extensible to any face recognition dataset. Download Yale Face Database from [here](http://vision.ucsd.edu/content/yale-face-database).
 
 ## Running
 
